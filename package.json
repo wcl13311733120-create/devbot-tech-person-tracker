@@ -1,0 +1,12 @@
+{
+  "name": "tech-person-tracker",
+  "version": "1.0.0",
+  "description": "科技人物深度追踪与舆情分析平台 MVP — 人物库、事件时间线、情感分析、风险分级、对比分析、报告生成",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}

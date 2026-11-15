@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>科技人物深度追踪与舆情分析平台</title>
+<meta name="description" content="科技人物舆情追踪：事件时间线、情感分析、风险分级、对比分析、报告生成">
+<style>
+:root{--bg:#0b0f1a;--card:#14192b;--card2:#1c2340;--line:#2a3155;--ink:#e8ecf7;--muted:#9aa3c4;--accent:#6366f1;--accent2:#ec4899;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--grad:linear-gradient(135deg,#6366f1,#ec4899)}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;background:var(--bg);color:var(--ink)}
+.container{max-width:1180px;margin:0 auto;padding:20px 18px 60px}
+header{background:var(--grad);border-radius:16px;padding:26px 24px;margin-bottom:18px}
+header h1{margin:0 0 6px;font-size:26px}
+header p{margin:0;opacity:.92;font-size:14px}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.2);margin-right:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.card h2{font-size:18px;margin:0 0 12px;color:#c7caff}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#10152a;color:var(--ink);font-size:14px;font-family:inherit}
+.btn{padding:10px 18px;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;background:var(--accent);color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:var(--card2);color:#c7caff;border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.metric{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.metric .v{font-size:24px;font-weight:700;color:#fff;display:block}
+.metric .l{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;margin-right:6px}
+.pill.pos{background:rgba(34,197,94,.16);color:#7ee2a8}
+.pill.neg{background:rgba(239,68,68,.16);color:#ff9c9c}
+.pill.mix{background:rgba(245,158,11,.16);color:#fcd34d}
+.pill.neu{background:rgba(148,163,184,.16);color:#cbd5e1}
+.person-card{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.15s}
+.person-card:hover{border-color:var(--accent)}
+.person-card.active{border-color:var(--accent);background:rgba(99,102,241,.12)}
+.person-card .name{font-weight:700;font-size:15px}
+.person-card .role{font-size:12px;color:var(--muted);margin-top:2px}
+.person-card .heat{font-size:12px;color:#c7caff;margin-top:6px}
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item::before{content:'';position:absolute;left:-18px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+.tl-item .date{font-size:11px;color:var(--muted)}
+.tl-item .title{font-size:14px;margin:2px 0}
+.tl-item .meta{font-size:12px;color:var(--muted)}
+.bar{height:8px;background:#10152a;border-radius:999px;overflow:hidden;margin:4px 0}
+.bar>i{display:block;height:100%;background:var(--grad);border-radius:999px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;background:var(--card2);border:1px solid var(--line);margin:0 6px 6px 0}
+.check{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.check .ico{width:20px;height:20px;border-radius:50%;flex:0 0 20px;text-align:center;line-height:20px;font-size:12px;font-weight:700}
+.ok .ico{background:rgba(34,197,94,.2);color:#7ee2a8}
+.no .ico{background:rgba(239,68,68,.2);color:#ff9c9c}
+pre{background:#0a0e1c;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font-size:12px;white-space:pre-wrap;word-break:break-word;margin:6px 0 0;color:#c8d0f5}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.hidden{display:none!important}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{padding:8px 16px;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:#c7caff;cursor:pointer;font-size:13px}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
+@media(max-width:640px){header h1{font-size:20px}.container{padding:14px 12px 40px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📡 科技人物深度追踪与舆情分析</h1>
+    <p>基于 X 平台科技人物舆情数据 · 事件时间线 · 情感分析 · 风险分级 · 多人物对比 · 报告生成</p>
+    <p style="margin-top:8px"><span class="badge">Node.js + Express</span><span class="badge">零构建 HTML/JS</span><span class="badge">静态 Pages 可独立运行</span><span class="badge">DevBot</span></p>
+  </header>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" data-tab="people">① 人物库</div>
+      <div class="tab" data-tab="detail">② 详情与时间线</div>
+      <div class="tab" data-tab="compare">③ 对比分析</div>
+      <div class="tab" data-tab="top">④ 热门事件</div>
+      <div class="tab" data-tab="report">⑤ 报告生成</div>
+      <div class="tab" data-tab="track">⑥ 追踪记录</div>
+    </div>
+
+    <!-- 人物库 -->
+    <section id="tab-people">
+      <h2>科技人物库</h2>
+      <div class="row" style="margin-top:0">
+        <input id="search" placeholder="搜索姓名/职位/关键词" style="flex:1;min-width:200px">
+        <button class="btn sm" onclick="doSearch()">搜索</button>
+      </div>
+      <div class="grid g3" id="peopleGrid" style="margin-top:12px"></div>
+    </section>
+
+    <!-- 详情 -->
+    <section id="tab-detail" class="hidden">
+      <h2>人物详情与事件时间线</h2>
+      <div id="detailBox"><p class="hint">请先在人物库中选择人物。</p></div>
+    </section>
+
+    <!-- 对比 -->
+    <section id="tab-compare" class="hidden">
+      <h2>多人物对比分析</h2>
+      <div class="row" style="margin-top:0">
+        <select id="cmpA" style="flex:1"></select>
+        <select id="cmpB" style="flex:1"></select>
+        <button class="btn sm" onclick="doCompare()">对比</button>
+      </div>
+      <div id="compareBox" style="margin-top:12px"></div>
+    </section>
+
+    <!-- 热门事件 -->
+    <section id="tab-top" class="hidden">
+      <h2>热门事件排行</h2>
+      <div id="topBox"></div>
+    </section>
+
+    <!-- 报告 -->
+    <section id="tab-report" class="hidden">
+      <h2>舆情报告生成</h2>
+      <div class="row" style="margin-top:0">
+        <select id="repPerson" style="flex:1"></select>
+        <button class="btn sm" onclick="genReport()">生成报告</button>
+        <button class="btn ghost sm" onclick="copyReport()">复制</button>
+      </div>
+      <pre id="reportBox" style="margin-top:12px;min-height:200px"></pre>
+    </section>
+
+    <!-- 追踪记录 -->
+    <section id="tab-track" class="hidden">
+      <h2>追踪记录</h2>
+      <div class="row" style="margin-top:0">
+        <select id="trackPerson" style="flex:1"></select>
+        <input id="trackNote" placeholder="追踪备注（如：持续关注其 AI 芯片言论）" style="flex:2">
+        <button class="btn sm" onclick="doTrack()">记录</button>
+      </div>
+      <table><thead><tr><th>时间</th><th>人物</th><th>备注</th><th>快照</th></tr></thead><tbody id="trackBody"></tbody></table>
+    </section>
+  </div>
+
+  <footer>科技人物深度追踪与舆情分析 · DevBot MVP · 数据保存在浏览器本地（静态模式）或服务器 JSON（Node 模式）</footer>
+</div>
+
+<script src="lib/tracker.js"></script>
+<script>
+const T = window.Tracker;
+let selectedPerson = null;
+let currentReport = '';
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('section[id^="tab-"]').forEach(x=>x.classList.add('hidden'));
+  t.classList.add('active');
+  document.getElementById('tab-'+t.dataset.tab).classList.remove('hidden');
+  if(t.dataset.tab==='top') loadTop();
+  if(t.dataset.tab==='track') loadTrack();
+}));
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c]));}
+
+function initSelects(){
+  const opts = T.PEOPLE.map(p=>'<option value="'+p.id+'">'+esc(p.name)+' · '+esc(p.role)+'</option>').join('');
+  ['cmpA','cmpB','repPerson','trackPerson'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML=opts;});
+  if(document.getElementById('cmpA')) document.getElementById('cmpA').value='jensen';
+  if(document.getElementById('cmpB')) document.getElementById('cmpB').value='musk';
+}
+
+function renderPeople(list){
+  document.getElementById('peopleGrid').innerHTML = list.map(p=>{
+    const a = T.analyzePerson(p.id);
+    const heat = a ? a.heatTotal.toLocaleString() : '0';
+    const risk = a ? a.riskLevel : '-';
+    const rc = risk==='高'?'var(--bad)':risk==='中'?'var(--warn)':'var(--good)';
+    return '<div class="person-card'+(selectedPerson===p.id?' active':'')+'" onclick="selectPerson(\''+p.id+'\')">'+
+      '<div class="name">'+esc(p.name)+'</div>'+
+      '<div class="role">'+esc(p.role)+'</div>'+
+      '<div class="heat">累计热度 '+heat+' · 风险 <span style="color:'+rc+';font-weight:600">'+risk+'</span></div>'+
+      '<div style="margin-top:6px">'+p.keywords.map(k=>'<span class="tag">'+esc(k)+'</span>').join('')+'</div></div>';
+  }).join('');
+}
+
+function doSearch(){
+  const q = document.getElementById('search').value;
+  renderPeople(T.searchPeople(q));
+}
+
+function selectPerson(id){
+  selectedPerson=id;
+  renderPeople(T.searchPeople(document.getElementById('search').value));
+  const a = T.analyzePerson(id);
+  if(!a){document.getElementById('detailBox').innerHTML='<p class="hint">未找到。</p>';return;}
+  const {person,events,heatTotal,posCount,negCount,mixCount,neuCount,trend,riskLevel,allTags,eventCount}=a;
+  const rc = riskLevel==='高'?'var(--bad)':riskLevel==='中'?'var(--warn)':'var(--good)';
+  document.getElementById('detailBox').innerHTML=
+    '<div class="grid g4">'+
+    '<div class="metric"><span class="v">'+eventCount+'</span><span class="l">事件总数</span></div>'+
+    '<div class="metric"><span class="v">'+heatTotal.toLocaleString()+'</span><span class="l">累计热度</span></div>'+
+    '<div class="metric"><span class="v" style="color:'+rc+'">'+riskLevel+'</span><span class="l">风险等级</span></div>'+
+    '<div class="metric"><span class="v">'+trend+'</span><span class="l">热度趋势</span></div></div>'+
+    '<h3 style="margin-top:14px">情感分布</h3>'+
+    '<div class="row"><span class="pill pos">正面 '+posCount+'</span><span class="pill neg">负面 '+negCount+'</span><span class="pill mix">争议 '+mixCount+'</span><span class="pill neu">中性 '+neuCount+'</span></div>'+
+    '<div class="bar"><i style="width:'+Math.min(100,Math.round((posCount/Math.max(1,eventCount))*100))+'%"></i></div>'+
+    '<h3>事件时间线</h3><div class="timeline">'+events.map(e=>
+      '<div class="tl-item"><div class="date">'+esc(e.date)+' · '+esc(e.source)+'</div>'+
+      '<div class="title">'+esc(e.title)+'</div>'+
+      '<div class="meta"><span class="pill '+e.sentiment+'">'+T.sentimentLabel(e.sentiment)+'</span> 热度 '+e.heat.toLocaleString()+' · '+e.tags.map(t=>'<span class="tag">'+esc(t)+'</span>').join('')+'</div></div>').join('')+'</div>'+
+    '<h3>关键话题</h3><div>'+allTags.map(t=>'<span class="tag">'+esc(t)+'</span>').join('')+'</div>'+
+    '<div class="row"><button class="btn sm" onclick="genReportFor(\''+id+'\')">生成报告</button><button class="btn ghost sm" onclick="saveTrack(\''+id+'\')">记录追踪</button></div>';
+}
+
+function doCompare(){
+  const a=document.getElementById('cmpA').value, b=document.getElementById('cmpB').value;
+  if(a===b){alert('请选择不同人物');return;}
+  const arr=T.comparePeople([a,b]);
+  if(arr.length<2){document.getElementById('compareBox').innerHTML='<p class="hint">数据不足。</p>';return;}
+  const [x,y]=arr;
+  document.getElementById('compareBox').innerHTML=
+    '<table><thead><tr><th>指标</th><th>'+esc(x.person.name)+'</th><th>'+esc(y.person.name)+'</th></tr></thead><tbody>'+
+    '<tr><td>事件数</td><td>'+x.eventCount+'</td><td>'+y.eventCount+'</td></tr>'+
+    '<tr><td>累计热度</td><td>'+x.heatTotal.toLocaleString()+'</td><td>'+y.heatTotal.toLocaleString()+'</td></tr>'+
+    '<tr><td>风险等级</td><td>'+x.riskLevel+'</td><td>'+y.riskLevel+'</td></tr>'+
+    '<tr><td>趋势</td><td>'+x.trend+'</td><td>'+y.trend+'</td></tr>'+
+    '<tr><td>正面事件</td><td>'+x.posCount+'</td><td>'+y.posCount+'</td></tr>'+
+    '<tr><td>负面事件</td><td>'+x.negCount+'</td><td>'+y.negCount+'</td></tr>'+
+    '<tr><td>争议事件</td><td>'+x.mixCount+'</td><td>'+y.mixCount+'</td></tr>'+
+    '<tr><td>关键话题</td><td>'+x.allTags.slice(0,5).join('、')+'</td><td>'+y.allTags.slice(0,5).join('、')+'</td></tr></tbody></table>';
+}
+
+function loadTop(){
+  const list=T.topEvents(12);
+  document.getElementById('topBox').innerHTML=
+    '<table><thead><tr><th>#</th><th>人物</th><th>事件</th><th>情感</th><th>热度</th><th>日期</th></tr></thead><tbody>'+
+    list.map((e,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(T.PEOPLE.find(p=>p.id===e.personId)?.name||e.personId)+'</td><td>'+esc(e.title)+'</td>'+
+    '<td><span class="pill '+e.sentiment+'">'+T.sentimentLabel(e.sentiment)+'</span></td><td>'+e.heat.toLocaleString()+'</td><td>'+e.date+'</td></tr>').join('')+'</tbody></table>';
+}
+
+function genReport(){
+  const id=document.getElementById('repPerson').value;
+  genReportFor(id);
+}
+function genReportFor(id){
+  const r=T.buildReport(id);
+  if(!r){alert('无法生成');return;}
+  currentReport=r;
+  document.getElementById('reportBox').textContent=r;
+  document.querySelector('.tab[data-tab="report"]').click();
+}
+function copyReport(){
+  if(!currentReport){alert('请先生成报告');return;}
+  navigator.clipboard.writeText(currentReport).then(()=>{alert('已复制');});
+}
+
+async function saveTrack(id){
+  const personId = id || (selectedPerson);
+  const note = prompt('追踪备注：') || '';
+  try{
+    const r=await fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({personId,note})});
+    if(r.ok){alert('已记录');loadTrack();}
+    else{ saveTrackLocal(personId,note); }
+  }catch(e){ saveTrackLocal(personId,note); }
+}
+function saveTrackLocal(personId,note){
+  const a=T.analyzePerson(personId);
+  const rec={id:'local-'+Date.now(),ts:new Date().toISOString(),personId,personName:a?a.person.name:personId,note,snapshot:a?{heatTotal:a.heatTotal,riskLevel:a.riskLevel,trend:a.trend}:{},local:true};
+  let list=[];try{list=JSON.parse(localStorage.getItem('tpt_tracks')||'[]');}catch(e){}
+  list.unshift(rec);try{localStorage.setItem('tpt_tracks',JSON.stringify(list.slice(0,200)));}catch(e){}
+  loadTrack();
+}
+async function doTrack(){
+  const personId=document.getElementById('trackPerson').value;
+  const note=document.getElementById('trackNote').value.trim();
+  await saveTrack(personId,note?note:'手动记录');
+  document.getElementById('trackNote').value='';
+}
+async function loadTrack(){
+  let list=[];
+  try{const r=await fetch('/api/tracking');if(r.ok){const d=await r.json();if(Array.isArray(d))list=d;}}catch(e){}
+  if(!list.length){try{list=JSON.parse(localStorage.getItem('tpt_tracks')||'[]');}catch(e){}}
+  document.getElementById('trackBody').innerHTML=list.map(r=>
+    '<tr><td>'+esc((r.ts||'').slice(0,16).replace('T',' '))+'</td><td>'+esc(r.personName||r.personId)+'</td>'+
+    '<td>'+esc(r.note||'-')+'</td><td>'+esc(JSON.stringify(r.snapshot||{}))+'</td></tr>').join('');
+}
+
+initSelects();
+renderPeople(T.PEOPLE);
+loadTrack();
+</script>
+</body>
+</html>
